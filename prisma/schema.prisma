@@ -1,0 +1,48 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id             String    @id @default(uuid())
+  name           String    // Nome do produto
+  category       String    // Categoria do produto
+  description    String    // Descrição do produto
+  price          Float     // Preço do produto
+  stock_quantity Int       // Quantidade em estoque
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  OrderProduct   OrderProduct[] // Relação com a tabela pivot OrderProduct
+}
+
+model Order {
+  id           String    @id @default(uuid())
+  order_total  Float     // Valor total do pedido
+  status       String    // "Pendente", "Concluído", "Cancelado" - Status do pedido
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  products     OrderProduct[] // Relação com a tabela pivot OrderProduct
+}
+
+// Tabela pivot para a relação muitos-para-muitos entre Order e Product
+model OrderProduct {
+  id        String  @id @default(uuid())
+  order     Order   @relation(fields: [orderId], references: [id])
+  orderId   String
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+  quantity  Int     // Quantidade deste produto específico neste pedido
+
+  @@unique([orderId, productId]) // Garante que um produto apareça apenas uma vez por pedido
+}
