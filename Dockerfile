@@ -4,6 +4,11 @@ WORKDIR /usr/src/app
 COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile --production=false # Instalar todas as deps, incluindo devDeps para build
 
+# --- Dependencies Stage ---
+FROM node:22-alpine AS dependencies
+WORKDIR /usr/src/app
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile --production=false # Instalar todas as deps, incluindo devDeps para build
 # --- Build Stage ---
 FROM dependencies AS build
 COPY . .
